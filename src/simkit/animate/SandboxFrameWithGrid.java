@@ -5,7 +5,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import javax.swing.JLabel;
-import javax.swing.JScrollPane;
 
 /**
  *
@@ -50,8 +49,8 @@ public class SandboxFrameWithGrid extends SandboxFrame {
             int x = e.getX();
             int y = e.getY();
             Point2D origin = sandboxWithGrid.getOrigin();
-            double trueX = x - origin.getX();
-            double trueY = origin.getY() - y;
+            double trueX = (x - origin.getX()) * sandboxWithGrid.getScale();
+            double trueY = (origin.getY() - y) * sandboxWithGrid.getScale();
             setText(String.format("(%.2f, %.2f)", trueX, trueY));
         }
         

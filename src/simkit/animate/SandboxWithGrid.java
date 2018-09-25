@@ -14,6 +14,11 @@ public class SandboxWithGrid extends Sandbox {
     private int gridWidth;
     
     private double scale;
+    
+    public SandboxWithGrid() {
+        super();
+        this.scale = 1.0;
+    }
 
     @Override
     public void paintComponent(Graphics g) {
