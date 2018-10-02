@@ -2,6 +2,7 @@ package simkit.animate;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
@@ -21,8 +22,17 @@ public class SandboxWithGrid extends Sandbox {
     }
 
     @Override
+    public Component add(Component c) {
+        if (c instanceof Point2DIcon) {
+            ((Point2DIcon)c).setOrigin(getOrigin());
+        }
+        return super.add(c);
+    }
+    
+    @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        
 
         int height = getHeight();
         int width = getWidth();

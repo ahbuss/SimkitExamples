@@ -10,6 +10,7 @@ import simkit.smd.BasicLinearMover;
 import simkit.smd.CookieCutterSensor;
 import simkit.smd.Mover;
 import simkit.smd.Sensor;
+import simkit.smd.WayPoint;
 
 /**
  *
@@ -44,6 +45,16 @@ public class TestSandboxFrameWithGrid {
         sensorIcon.setColor(Color.RED);
         sandbox.add(sensorIcon);
         sandbox.add(moverIcon);
+        
+        WayPoint[] waypoints = new WayPoint[] {
+            new WayPoint(new Point2D.Double(0.0, 0.0)),
+            new WayPoint(new Point2D.Double(50.0, 60.0)),
+        };
+        for (WayPoint wp: waypoints) {
+            Point2DIcon wpicon = new Point2DIcon(wp.getPoint(), Color.RED);
+            wpicon.setOrigin(sandbox.getOrigin());
+            sandbox.add(wpicon);
+        }
         
         frame.setVisible(true);
     }
