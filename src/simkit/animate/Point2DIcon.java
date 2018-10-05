@@ -6,24 +6,26 @@ import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import javax.swing.Icon;
-import javax.swing.JComponent;
+import simkit.SimEntityBase;
 import simkit.actions.visual.ShapeIcon;
+import simkit.smd.Mover;
 
 /**
  *
  * @author ahbuss
  */
-public class Point2DIcon extends JComponent {
+public class Point2DIcon extends MoverIcon {
     private Point2D point;
     private Color color;
     private Point2D origin;
     private Icon icon;
 
     public Point2DIcon(Point2D point, Color color) {
+        super(null, new ShapeIcon(new Ellipse2D.Double(0, 0, 10, 10), color, color, true));
         this.setPoint(point);
         this.setColor(color);
 //        this.setOrigin(new Point2D.Double(0.0, 0.0));
-        this.setIcon(new ShapeIcon(new Ellipse2D.Double(0, 0, 50, 50), color, color, true));
+//        this.setIcon(new ShapeIcon(new Ellipse2D.Double(0, 0, 50, 50), color, color, true));
     }
     
     public Point2DIcon(Point2D point) {
@@ -34,6 +36,11 @@ public class Point2DIcon extends JComponent {
         this(new Point2D.Double(0.0, 0.0), Color.BLACK);
     }
     
+    @Override
+    public void setMover(Mover mover) {
+    }
+    
+    @Override
     public Point2D getScreenLocation() {
         Point2D screenLocation = new Point2D.Double(
                 origin.getX() + point.getX(),
@@ -105,10 +112,41 @@ public class Point2DIcon extends JComponent {
     /**
      * @param icon the icon to set
      */
+    @Override
     public void setIcon(Icon icon) {
         this.icon = icon;
     }
 
-    
+    private class BlankMover extends SimEntityBase implements Mover {
+
+        @Override
+        public Point2D getCurrentLocation() {
+            return getPoint();
+        }
+
+        @Override
+        public Point2D getVelocity() {
+            return new Point2D.Double(0.0, 0.0);
+        }
+
+        @Override
+        public void doStartMove(Mover mover) {
+        }
+
+        @Override
+        public void doStop(Mover mover) {
+        }
+
+        @Override
+        public double getMaxSpeed() {
+            return 0.0;
+        }
+        
+        @Override
+        public String getName() {
+            return String.format("(%.2f,%.2f", point.getX(), point.getY());
+        }
+        
+    }
     
 }

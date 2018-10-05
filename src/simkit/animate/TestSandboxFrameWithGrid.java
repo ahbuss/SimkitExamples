@@ -43,16 +43,24 @@ public class TestSandboxFrameWithGrid {
         footprint.setFilled(false);
         SensorIcon sensorIcon = new SensorIcon(sensor, footprint);
         sensorIcon.setColor(Color.RED);
+        sensorIcon.addMouseMotionListener(frame.getCoordinateListener());
         sandbox.add(sensorIcon);
         sandbox.add(moverIcon);
+        
+        Mover anotherMover = new BasicLinearMover(new Point2D.Double(50, 100), 0);
+        Icon anotherIcon = new ShapeIcon(new Ellipse2D.Double(0, 0, 40, 40), Color.BLACK, Color.CYAN);
+        MoverIcon anotherMoverIcon = new MoverIcon(anotherMover, anotherIcon);
+        anotherMoverIcon.addMouseMotionListener(frame.getCoordinateListener());
+        sandbox.add(anotherMoverIcon);
         
         WayPoint[] waypoints = new WayPoint[] {
             new WayPoint(new Point2D.Double(0.0, 0.0)),
             new WayPoint(new Point2D.Double(50.0, 60.0)),
         };
         for (WayPoint wp: waypoints) {
-            Point2DIcon wpicon = new Point2DIcon(wp.getPoint(), Color.RED);
+            Point2DIcon wpicon = new Point2DIcon(wp.getPoint(), Color.GRAY);
             wpicon.setOrigin(sandbox.getOrigin());
+            wpicon.addMouseMotionListener(frame.getCoordinateListener());
             sandbox.add(wpicon);
         }
         
