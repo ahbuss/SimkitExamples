@@ -3,6 +3,7 @@ package random;
 import java.util.Arrays;
 import java.util.logging.Logger;
 import simkit.random.RandomVariate;
+import simkit.random.DiscreteRandomVariate;
 import simkit.random.RandomVariateFactory;
 import simkit.stat.Histogram;
 
@@ -38,6 +39,20 @@ public class TestDiscreteVariate {
         int number = 1000000;
         for (int i = 0; i < number; ++i) {
             histogram.newObservation(rv.generate());
+        }
+        System.out.println(histogram);
+        
+//        Now do the same for DiscreteIntegerVariate
+        int[] intValues = new int[] { 1, 2, 3};
+        double[] intFrequencies = new double[] { 3, 4, 3};
+        DiscreteRandomVariate drv = 
+                RandomVariateFactory.getDiscreteRandomVariateInstance("DiscreteInteger", intValues, intFrequencies);
+        System.out.println(drv);
+        
+//        Proportions should be: 1 -> 0.3, 2 -> 0.4, 3 -> 0.3
+        histogram = new Histogram("Discrete Integer", 1, 3, 2);
+        for (int i = 0; i < number; ++i) {
+            histogram.newObservation(drv.generateInt());
         }
         System.out.println(histogram);
     }
