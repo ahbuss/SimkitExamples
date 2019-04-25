@@ -1,4 +1,4 @@
-package stat;
+package simkit.stat;
 
 import java.util.logging.Logger;
 /**
