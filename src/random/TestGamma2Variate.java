@@ -22,6 +22,10 @@ public class TestGamma2Variate {
         System.out.println(rv);
         rv.setParameters(2.0, 3.0);
         System.out.println(rv);
+        
+        RandomVariate rv2 = RandomVariateFactory.getInstance(rv.toString());
+        System.out.println(rv2);
+        
     }
     
     public static void setMeanAndVarianceOn(RandomVariate rv, double mean, double variance) {

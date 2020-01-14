@@ -1,7 +1,6 @@
 package simkit.util;
 
 import com.opencsv.CSVWriter;
-import com.sun.xml.internal.ws.policy.NestedPolicy;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
