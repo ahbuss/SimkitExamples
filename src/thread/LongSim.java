@@ -75,6 +75,7 @@ public class LongSim extends SimEntityBase {
      */
     public static void main(String[] args) {
 
+        System.out.printf("Running on %s with %s architecture%n", System.getProperty("os.name"), System.getProperty("os.arch"));
         int numberProcessors = Runtime.getRuntime().availableProcessors();
         ExecutorService executorService = Executors.newFixedThreadPool(numberProcessors);
 
@@ -99,7 +100,7 @@ public class LongSim extends SimEntityBase {
         }
         try {
             executorService.shutdown();
-            executorService.awaitTermination(1L, TimeUnit.HOURS);
+            executorService.awaitTermination(3L, TimeUnit.DAYS);
         } catch (InterruptedException ex) {
             Logger.getLogger(LongSim.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -107,7 +108,7 @@ public class LongSim extends SimEntityBase {
         LocalDateTime end = LocalDateTime.now();
         long millis = ChronoUnit.MILLIS.between(start, end);
 
-        System.out.printf("%,3f secs all runs%n", millis * 0.001);
+        System.out.printf(" Ended at %s, %,3f secs all runs%n", end, millis * 0.001);
     }
 
     private static class Task implements Runnable {
