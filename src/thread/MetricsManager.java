@@ -2,11 +2,14 @@ package thread;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import simkit.SimEntityBase;
-import simkit.SimEvent;
 import simkit.stat.CollectionSizeTimeVaryingStats;
 import simkit.stat.SampleStatistics;
 import simkit.stat.SimpleStatsTally;
@@ -24,14 +27,27 @@ public class MetricsManager implements PropertyChangeListener {
 
     private final Map<String, SimpleStatsTally> outerStats;
 
-    private SimEntityBase simulation;
-    
+    private final SimEntityBase simulation;
+
+    private Connection connection;
+
     private int simID;
-    
+
+    private PreparedStatement outputPS;
+
     public MetricsManager(SimEntityBase simulation) {
         this.innerStats = new HashMap<>();
         this.outerStats = new HashMap<>();
         this.simulation = simulation;
+    }
+
+    public void setConnection(Connection connection) {
+        try {
+            this.connection = connection;
+            this.outputPS = connection.prepareStatement("INSERT Into SimOutput VALUES (?, ?, ?, ?)");
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
@@ -49,20 +65,37 @@ public class MetricsManager implements PropertyChangeListener {
                 clearInnerStats();
                 break;
             case "endSimulation": // update output
-                for (String metricName : outerStats.keySet()) {
-                    LOGGER.info(String.format("(%d) [%d] %s: %,.4f (%,d replications) ", 
-                            simulation.getEventListID(), this.simID,
-                            metricName, outerStats.get(metricName).getMean(), 
-                            outerStats.get(metricName).getCount()));
-                }
+//                for (String metricName : outerStats.keySet()) {
+//                    LOGGER.info(String.format("(%d) [%d] %s: %,.4f (%,d replications) ", 
+//                            simulation.getEventListID(), this.simID,
+//                            metricName, outerStats.get(metricName).getMean(), 
+//                            outerStats.get(metricName).getCount()));
+//                }
+                writeOutput();
                 break;
             default:
                 String property = evt.getPropertyName();
                 if (innerStats.containsKey(property)) {
                     SampleStatistics stat = innerStats.get(property);
-                    stat.newObservation((Number)evt.getNewValue());
+                    stat.newObservation((Number) evt.getNewValue());
                 }
                 break;
+        }
+    }
+
+    private void writeOutput() {
+        try {
+            for (String metricName : outerStats.keySet()) {
+                outputPS.setInt(1, simID);
+                outputPS.setString(2, metricName);
+                outputPS.setDouble(3, outerStats.get(metricName).getMean());
+                outputPS.setInt(4, outerStats.get(metricName).getCount());
+                outputPS.addBatch();
+            }
+            outputPS.executeBatch();
+            connection.commit();
+        } catch (SQLException ex) {
+            Logger.getLogger(MetricsManager.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

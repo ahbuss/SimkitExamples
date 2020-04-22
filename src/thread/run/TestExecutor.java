@@ -1,11 +1,16 @@
 package thread.run;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static org.sqlite.JDBC.PREFIX;
 import simkit.Schedule;
 import simkit.components.ArrivalProcess;
 import simkit.components.SimpleServer;
@@ -29,10 +34,10 @@ public class TestExecutor {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         ReentrantLock lock = new ReentrantLock();
         int numberProcessors = Runtime.getRuntime().availableProcessors();
-        int numberTasks = numberProcessors * 10;
+        int numberTasks = numberProcessors * 3;
 //        numberTasks = 2;
         double stopTime = 100000.0;
         int id;
@@ -41,6 +46,13 @@ public class TestExecutor {
                 new Object[]{numberTasks, numberProcessors});
         LOGGER.log(Level.INFO, "Each simulation will be run for {0} time units "
                 + "and {1} replications", new Object[]{stopTime, numberReplications});
+
+        Connection connection = DriverManager.getConnection(PREFIX.concat("output/SimOut.SQLite"));
+        Statement statement = connection.createStatement();
+            String createTable = "CREATE TABLE IF NOT EXISTS SimOutput (SimID INTEGER, Name TEXT, Value REAL, Replications INTEGER)";
+        statement.executeUpdate(createTable);
+        statement.close();
+        connection.setAutoCommit(false);
 
         for (int i = 0; i < numberProcessors; ++i) {
             lock.lock();
@@ -69,6 +81,7 @@ public class TestExecutor {
             Executor executor = new Executor(simpleServer, numberReplications);
             executor.setVerbose(false);
             MetricsManager metricsManager = new MetricsManager(simpleServer);
+            metricsManager.setConnection(connection);
             metricsManager.addMetric("numberInQueue", TIME_VARYING);
             metricsManager.addMetric("numberAvailableServers", TIME_VARYING);
             executor.addPropertyChangeListener(metricsManager);
@@ -83,6 +96,7 @@ public class TestExecutor {
         executorService.shutdown();
         try {
             executorService.awaitTermination(1L, TimeUnit.DAYS);
+            connection.close();
         } catch (InterruptedException ex) {
             Logger.getLogger(TestExecutor.class.getName()).log(Level.SEVERE, null, ex);
         }
