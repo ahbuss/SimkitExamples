@@ -5,6 +5,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import simkit.BasicEventList;
@@ -25,10 +26,12 @@ import simkit.stat.SimpleStatsTimeVarying;
 public class MuliThreadQueues {
 
     private static final double STOP_TIME = 1000000.0;
-    
+
     private static int numberCompleted;
-    
+
     private static Map<Integer, Long> completedSims = new TreeMap<>();
+
+    private static final ReentrantLock LOCK = new ReentrantLock();
 
     /**
      * @param args the command line arguments
@@ -36,7 +39,7 @@ public class MuliThreadQueues {
     public static void main(String[] args) {
         int numberPrecessors = Runtime.getRuntime().availableProcessors();
         ExecutorService executorService = Executors.newFixedThreadPool(numberPrecessors);
-        int number = numberPrecessors * 3 ;
+        int number = numberPrecessors * 20;
         System.out.printf("Will attempt %d parallel runs on %d processors%n", number, numberPrecessors);
         numberCompleted = 0;
         long start = System.currentTimeMillis();
@@ -63,12 +66,17 @@ public class MuliThreadQueues {
         private final int id;
 
         private SimpleStatsTally counter;
-        
+
         private SimpleStatsTimeVarying numberInQueueStat;
 
         public Task() {
-            id = Schedule.addNewEventList();
-            setupSimulation();
+            LOCK.lock();
+            try {
+                id = Schedule.addNewEventList();
+                setupSimulation();
+            } finally {
+                LOCK.unlock();
+            }
         }
 
         private void setupSimulation() {
@@ -78,15 +86,14 @@ public class MuliThreadQueues {
 
             ArrivalProcess arrivalProcess = new ArrivalProcess(iat);
             arrivalProcess.setEventListID(id);
-            
+
             int numberServers = 2;
             RandomVariate stg = RandomVariateFactory.getInstance("Gamma", 1.7, 1.8);
-            
-            
+
             SimpleServer simpleServer = new SimpleServer(numberServers, stg);
             simpleServer.setEventListID(id);
             arrivalProcess.addSimEventListener(simpleServer);
-            
+
             numberInQueueStat = new SimpleStatsTimeVarying("numberInQueue");
             numberInQueueStat.setEventListID(id);
             simpleServer.addPropertyChangeListener(numberInQueueStat);
@@ -102,7 +109,7 @@ public class MuliThreadQueues {
 
             numberCompleted += 1;
             completedSims.put(id, Thread.currentThread().getId());
-            System.out.printf("Sim %,d (Thread %d) ended at time %,.2f with mean # in queue %,.3f%n", 
+            System.out.printf("Sim %,d (Thread %d) ended at time %,.2f with mean # in queue %,.3f%n",
                     id, Thread.currentThread().getId(), eventList.getSimTime(), numberInQueueStat.getMean());
         }
 
