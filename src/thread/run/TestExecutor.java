@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +39,7 @@ public class TestExecutor {
         ReentrantLock lock = new ReentrantLock();
         int numberProcessors = Runtime.getRuntime().availableProcessors();
         int numberTasks = numberProcessors * 3;
-//        numberTasks = 2;
+        numberTasks = 1000;
         double stopTime = 100000.0;
         int id;
         int numberReplications = 30;
@@ -49,11 +50,13 @@ public class TestExecutor {
 
         Connection connection = DriverManager.getConnection(PREFIX.concat("output/SimOut.SQLite"));
         Statement statement = connection.createStatement();
-            String createTable = "CREATE TABLE IF NOT EXISTS SimOutput (SimID INTEGER, Name TEXT, Value REAL, Replications INTEGER)";
+        String createTable = "CREATE TABLE IF NOT EXISTS SimOutput (RunID String, SimID INTEGER, Name TEXT, Value REAL, Replications INTEGER)";
         statement.executeUpdate(createTable);
         statement.close();
         connection.setAutoCommit(false);
 
+        String runID = UUID.randomUUID().toString();
+        
         for (int i = 0; i < numberProcessors; ++i) {
             lock.lock();
             try {
@@ -80,7 +83,7 @@ public class TestExecutor {
 
             Executor executor = new Executor(simpleServer, numberReplications);
             executor.setVerbose(false);
-            MetricsManager metricsManager = new MetricsManager(simpleServer);
+            MetricsManager metricsManager = new MetricsManager(simpleServer, runID);
             metricsManager.setConnection(connection);
             metricsManager.addMetric("numberInQueue", TIME_VARYING);
             metricsManager.addMetric("numberAvailableServers", TIME_VARYING);

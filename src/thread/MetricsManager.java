@@ -34,17 +34,20 @@ public class MetricsManager implements PropertyChangeListener {
     private int simID;
 
     private PreparedStatement outputPS;
+    
+    private String runID;
 
-    public MetricsManager(SimEntityBase simulation) {
+    public MetricsManager(SimEntityBase simulation, String runID) {
         this.innerStats = new HashMap<>();
         this.outerStats = new HashMap<>();
         this.simulation = simulation;
+        this.runID = runID;
     }
 
     public void setConnection(Connection connection) {
         try {
             this.connection = connection;
-            this.outputPS = connection.prepareStatement("INSERT Into SimOutput VALUES (?, ?, ?, ?)");
+            this.outputPS = connection.prepareStatement("INSERT Into SimOutput VALUES (?, ?, ?, ?, ?)");
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
@@ -85,11 +88,12 @@ public class MetricsManager implements PropertyChangeListener {
 
     private void writeOutput() {
         try {
+            outputPS.setString(1, runID);
             for (String metricName : outerStats.keySet()) {
-                outputPS.setInt(1, simID);
-                outputPS.setString(2, metricName);
-                outputPS.setDouble(3, outerStats.get(metricName).getMean());
-                outputPS.setInt(4, outerStats.get(metricName).getCount());
+                outputPS.setInt(2, simID);
+                outputPS.setString(3, metricName);
+                outputPS.setDouble(4, outerStats.get(metricName).getMean());
+                outputPS.setInt(5, outerStats.get(metricName).getCount());
                 outputPS.addBatch();
             }
             outputPS.executeBatch();
