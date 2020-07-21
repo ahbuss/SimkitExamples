@@ -6,6 +6,14 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
+ * <p>
+ * Instances of this class generate values from a Markov Chain with the given
+ * transition probabilities on the state space [0,..n-1] where n is the size of
+ * the transition matrix.
+ * <p>
+ IMPORTANT: if the initial initialState is not specified, then it defaults to 0. If
+ this is not a valid initialState, then it should be explicitly called or specified
+ in the call to <code>RandomVariateFactory</code>.
  *
  * @author ahbuss
  */
@@ -13,11 +21,15 @@ public class MarkovChainVariate extends RandomVariateBase implements DiscreteRan
 
     private static final Logger LOGGER = Logger.getLogger(MarkovChainVariate.class.getName());
 
+    private static final double EPSILON = 1.0E-10;
+
     private double[][] transitionMatrix;
 
     private final Map<Integer, DiscreteRandomVariate> transitions;
 
-    private int state;
+    private int initialState;
+    
+    protected int currentState;
 
     public MarkovChainVariate() {
         transitions = new TreeMap<>();
@@ -28,12 +40,27 @@ public class MarkovChainVariate extends RandomVariateBase implements DiscreteRan
         return (double) generateInt();
     }
 
+    /**
+     * <p>
+     * The first argument should be the transition matrix as a
+     * <code>double[][]</code>. Because of the peculiarities of varargs, it must
+     * be wrapped in an <code>Object[]<code> array.
+     * <p>
+ The second (optional) argumen is an integer that is the initial initialState.
+     *
+     * @param params Given parameters
+     * @throws IllegalArgumentException is params.length is not 1 or 2
+     * @throws IllegalArgumentException if params[0] is not a
+     * <code>double[][]</code> array
+     * @throws IllegalArgumentException if params.length == 2 and params[1] is
+     * not an Integer
+     */
     @Override
     public void setParameters(Object... params) {
         String message = "";
         switch (params.length) {
             case 1:
-                state = 0;
+                initialState = 0;
                 if (params[0] instanceof double[][]) {
                     setTransitionMatrix((double[][]) params[0]);
                 } else {
@@ -47,15 +74,16 @@ public class MarkovChainVariate extends RandomVariateBase implements DiscreteRan
                     message += ("params[0] must be double[][]: " + params[0].getClass().getSimpleName());
                 }
                 if (params[1] instanceof Integer) {
-                    this.setState((int) params[1]);
+                    this.setInitialState((int) params[1]);
                 } else {
-                    message +=(" params[1] if present must be Integer: " + params[1].getClass().getSimpleName());
+                    message += (" params[1] if present must be Integer: " + params[1].getClass().getSimpleName());
                 }
                 break;
             default:
                 message += ("params must be length 0 or 2: " + params.length);
                 break;
         }
+        currentState = initialState;
         if (message.length() > 0) {
             LOGGER.severe(message);
             throw new IllegalArgumentException(message);
@@ -64,16 +92,16 @@ public class MarkovChainVariate extends RandomVariateBase implements DiscreteRan
 
     @Override
     public Object[] getParameters() {
-        Object[] params = null;
-
+        Object[] params = new Object[]{
+            deepCopy(transitionMatrix), getInitialState()};
         return params;
     }
 
     @Override
     public int generateInt() {
-        DiscreteRandomVariate drv = transitions.get(state);
-        this.state = drv.generateInt();
-        return state;
+        DiscreteRandomVariate drv = transitions.get(currentState);
+        this.currentState = drv.generateInt();
+        return currentState;
     }
 
     /**
@@ -108,15 +136,22 @@ public class MarkovChainVariate extends RandomVariateBase implements DiscreteRan
     /**
      * @return the row
      */
-    public int getState() {
-        return state;
+    public int getInitialState() {
+        return initialState;
     }
 
     /**
-     * @param state the row to set
+     * @param initialState the row to set
      */
-    public void setState(int state) {
-        this.state = state;
+    public void setInitialState(int initialState) {
+        this.initialState = initialState;
+    }
+
+    /**
+     * @return the currentState
+     */
+    public int getCurrentState() {
+        return currentState;
     }
 
     public static double[][] deepCopy(double[][] matrix) {
@@ -130,15 +165,22 @@ public class MarkovChainVariate extends RandomVariateBase implements DiscreteRan
     public static void normalize(double[][] matrix) {
         for (int row = 0; row < matrix.length; ++row) {
             double sum = 0.0;
-            for (double x : matrix[row]) {
-                sum += x;
+            for (int col = 0; col < matrix[row].length; ++col) {
+                if (matrix[row][col] < 0.0) {
+                    String message = String.format(
+                            "Negative value in transition matrix: P[%,d,%,d]=%,.3f",
+                            row, col, matrix[row][col]);
+                    LOGGER.severe(message);
+                    throw new IllegalArgumentException(message);
+                }
+                sum += matrix[row][col];
             }
             for (int col = 0; col < matrix[row].length; ++col) {
                 matrix[row][col] /= sum;
             }
         }
     }
-    
+
     public static boolean isSquare(double[][] matrix) {
         boolean square = true;
         for (int row = 0; row < matrix.length; ++row) {
@@ -149,13 +191,69 @@ public class MarkovChainVariate extends RandomVariateBase implements DiscreteRan
         }
         return square;
     }
-    
+
+    public static double[] getSteadyState(double[][] matrix) {
+        double[] steadyState = new double[matrix.length];
+        if (isSquare(matrix)) {
+            double[][] copy = deepCopy(matrix);
+            normalize(copy);
+            double copyScore = score(copy);
+            while (copyScore > EPSILON) {
+                copy = matrixSquare(copy);
+                copyScore = score(copy);
+            }
+            steadyState = copy[0];
+        }
+        return steadyState;
+    }
+
+    public static double[][] matrixSquare(double[][] matrix) {
+        double[][] matrixSq = new double[matrix.length][matrix[0].length];
+        for (int i = 0; i < matrix.length; ++i) {
+            for (int j = 0; j < matrix.length; ++j) {
+                double sum = 0.0;
+                for (int k = 0; k < matrix.length; ++k) {
+                    sum += matrix[i][k] * matrix[k][j];
+                }
+                matrixSq[i][j] = sum;
+            }
+        }
+        return matrixSq;
+    }
+
+    public static double score(double[][] matrix) {
+        double score = 0.0;
+        for (int col = 0; col < matrix.length; ++col) {
+            double max = Double.NEGATIVE_INFINITY;
+            double min = Double.POSITIVE_INFINITY;
+            for (int row = 0; row < matrix.length; ++row) {
+                if (matrix[row][col] < min) {
+                    min = matrix[row][col];
+                }
+                if (matrix[row][col] > max) {
+                    max = matrix[row][col];
+                }
+            }
+            score += max - min;
+        }
+        return score;
+    }
+
+    public static String matrixToString(double[][] matrix) {
+        StringBuilder builder = new StringBuilder(Arrays.toString(matrix[0]));
+        for (int i = 1; i < matrix.length; ++i) {
+            builder.append('\n').append(Arrays.toString(matrix[i]));
+        }
+        return builder.toString();
+    }
+
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("Markov Chain");
         for (int row = 0; row < transitionMatrix.length; ++row) {
             builder.append('\n').append(Arrays.toString(transitionMatrix[row]));
         }
-        
+
         return builder.toString();
     }
 

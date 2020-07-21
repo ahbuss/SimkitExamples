@@ -38,6 +38,13 @@ public class TestDemands1 {
             new double[]{9, 10, 11, 12},
             new double[]{13, 14, 15, 16}
         };
+//        matrix = new double[][]{
+//            new double[]{10, 1, 0, 0},
+//            new double[]{1, 10, 1, 0},
+//            new double[]{0, 1, 10, 1},
+//            new double[]{0, 0, 1, 10}
+//        };
+
 //        matrix = new double[][] {new double[]{1, 9}, new double[] {8,2}};
 //
         MarkovChainVariate demandGenerator

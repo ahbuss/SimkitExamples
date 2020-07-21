@@ -1,10 +1,21 @@
 package simkit.random;
 
-import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 import java.util.logging.Logger;
 
 /**
+ * <p>
+ * Instances of this class generate correlated Gamma random variates based on an
+ * approach in Gaver and Lewis (1986). The correlation rho must be ≥ 0 and the
+ * shape parameter k must be an integer. The generated sequence have a gamma
+ * distribution with the given parameters (k, lambda), where k is the shape and
+ * lambda is the scale. The lag-1 autocorrelation is rho.
+ *
+ * <p>
+ * The recursion is X<sub>n+1</sub>=&rho; X<sub>n</sub> + &epsilon;<sub>n</sub>
+ * where &epsilon;<sub>n</sub> is generated from a mixture of constant(0),
+ * Exponential(&lambda;) and Gamma(k, &lambda;), k = 2,...,k. If k = 1, then the
+ * marginals are Exponential(&lambda;).
  *
  * @author ahbuss
  */
@@ -31,6 +42,16 @@ public class GammaARVariate extends RandomVariateBase {
         return currentValue;
     }
 
+    /**
+     * Parameters:<ul>
+     * <li>params[0] is &lambda; (double)
+     * <li>params[1] is &rho; (double)
+     * <li>(optional) params[2] is k (defaults to 2)</ul>
+     *
+     * @param params Given parameters
+     * @throws IllegalArgumentException if params.length ≠ 2 or 3
+     * @throws IllegalArgumentException if an element of params is not Number
+     */
     @Override
     public void setParameters(Object... params) {
         if (params.length == 2) {
@@ -53,13 +74,28 @@ public class GammaARVariate extends RandomVariateBase {
                 setK(((Number) params[2]).intValue());
                 setupMixture();
             } else {
-                String message = "GammaARVariate requires 2 parameters: " + params.length;
-                LOGGER.severe(message);
-                throw new IllegalArgumentException(message);
+                String message = String.format("parameters must be Number: (%s, %s, %s)",
+                        params[0].getClass().getSimpleName(),
+                        params[1].getClass().getSimpleName(),
+                        params[2].getClass().getSimpleName());
+
             }
+        } else {
+            String message = "GammaARVariate requires 2 or 3 parameters: " + params.length;
+            LOGGER.severe(message);
+            throw new IllegalArgumentException(message);
         }
     }
 
+    /**
+     * <p>
+     * Creates the MixedVariate. The mixing probabilities are given by
+     * C(k,i)&rho;<sup>k-1</sup>(1-&rho;)<sup>i</sup> for i = 0,...,k.
+     * <p>
+     * The probability distributions are Gamma(i, &lambda;) for i = 0,...,k,
+     * noting that Gamma(0,&lambda;) is Constant(0) and Gamma(1,&lambda;) is
+     * Exponential(&lambda;).
+     */
     private void setupMixture() {
         RandomVariate[] all = new RandomVariate[k + 1];
         all[0] = RandomVariateFactory.getInstance("Constant", 0.0);
@@ -80,7 +116,7 @@ public class GammaARVariate extends RandomVariateBase {
 
     @Override
     public Object[] getParameters() {
-        return new Object[]{getLambda(), getRho()};
+        return new Object[]{getLambda(), getRho(), getK()};
     }
 
     /**
@@ -92,10 +128,11 @@ public class GammaARVariate extends RandomVariateBase {
 
     /**
      * @param rho the rho to set
+     * @throws IllegalArgumentException if &rho; ∉ [0,1]
      */
     public void setRho(double rho) {
-        if (abs(rho) > 1.0) {
-            String message = String.format("rho must be ∈ [-1,1]: %,f", rho);
+        if (rho < 0.0) {
+            String message = String.format("rho must be ∈ [0,1]: %,f", rho);
             LOGGER.severe(message);
             throw new IllegalArgumentException(message);
         }
@@ -111,6 +148,7 @@ public class GammaARVariate extends RandomVariateBase {
 
     /**
      * @param lambda the lambda to set
+     * @throws IllegalArgumentException if &lambda; ≤ 0.0
      */
     public void setLambda(double lambda) {
         if (lambda <= 0.0) {
@@ -148,6 +186,7 @@ public class GammaARVariate extends RandomVariateBase {
 
     /**
      * @param k the k to set
+     * @throws IllegalArgumentException if k < 1
      */
     public void setK(int k) {
         if (k < 1) {
@@ -158,7 +197,19 @@ public class GammaARVariate extends RandomVariateBase {
         this.k = k;
     }
 
+    /**
+     *
+     * @param n Given "n"
+     * @param k Given "choose k"
+     * @return Binomial coefficient C(n,k)
+     * @throws IllegalArgumentException if n < 0 or k < 0
+     */
     public static int binomialCoefficient(int n, int k) {
+        if (k < 0 || n < 0) {
+            String message = String.format("n and k must be ≥ 0: n = %,d, k = %,d", n, k);
+            LOGGER.severe(message);
+            throw new IllegalArgumentException(message);
+        }
         if (k == 0 || k == n) {
             return 1;
         }

@@ -1,16 +1,14 @@
 package simkit.random;
 
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Map.Entry;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
+import static simkit.random.MarkovChainVariate.matrixToString;
 import static simkit.random.MarkovChainVariate.normalize;
-import static simkit.random.TestDeepCopy.matrixToString;
 
 /**
  *

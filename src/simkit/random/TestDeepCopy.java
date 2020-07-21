@@ -1,8 +1,8 @@
 package simkit.random;
 
-import java.util.Arrays;
 import static simkit.random.MarkovChainVariate.deepCopy;
 import static simkit.random.MarkovChainVariate.isSquare;
+import static simkit.random.MarkovChainVariate.matrixToString;
 import static simkit.random.MarkovChainVariate.normalize;
 
 /**
@@ -38,12 +38,5 @@ public class TestDeepCopy {
         System.out.println(isSquare(copy));
     }
 
-    public static String matrixToString(double[][] matrix) {
-        StringBuilder builder = new StringBuilder(Arrays.toString(matrix[0]));
-        for (int i = 1; i < matrix.length; ++i) {
-            builder.append('\n').append(Arrays.toString(matrix[i]));
-        }
-        return builder.toString();
-    }
 
 }
