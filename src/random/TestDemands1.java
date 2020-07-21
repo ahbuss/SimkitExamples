@@ -24,11 +24,13 @@ public class TestDemands1 {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        double lambda = 2.5;
-        double rho = 0.7;
+        double lambda = 0.5;
+        double rho = 0.8;
 
-        RandomVariate interDemandGenerator = RandomVariateFactory.getInstance("GammaAR", lambda, rho);
+        RandomVariate interDemandGenerator = RandomVariateFactory.getInstance("GammaAR", lambda, rho, 10);
 
+        System.out.println(((GammaARVariate)interDemandGenerator).getMixtureVariate());
+        
         double truncationTime = 2000.0;
         double[][] matrix = new double[][]{
             new double[]{1, 2, 3, 4},
@@ -73,7 +75,8 @@ public class TestDemands1 {
 
         System.out.println(solution);
 
-        double meanInterdemandTime = ((GammaARVariate) interDemandGenerator).getLambda() * 2;
+        double meanInterdemandTime = ((GammaARVariate) interDemandGenerator).getLambda() 
+                * ((GammaARVariate) interDemandGenerator).getK();
         System.out.printf("theoretical: %,.3f%n", meanDemand / meanInterdemandTime);
 
         SimplePropertyDumper simplePropertyDumper = new SimplePropertyDumper();

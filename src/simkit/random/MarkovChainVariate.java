@@ -1,5 +1,6 @@
 package simkit.random;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
@@ -147,6 +148,15 @@ public class MarkovChainVariate extends RandomVariateBase implements DiscreteRan
             }
         }
         return square;
+    }
+    
+    public String toString() {
+        StringBuilder builder = new StringBuilder("Markov Chain");
+        for (int row = 0; row < transitionMatrix.length; ++row) {
+            builder.append('\n').append(Arrays.toString(transitionMatrix[row]));
+        }
+        
+        return builder.toString();
     }
 
 }
