@@ -17,7 +17,8 @@ public class TestGamma2Variate {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        RandomVariateFactory.addSearchPackage("random");
+//        Not needed as of version 1.5.2
+//        RandomVariateFactory.addSearchPackage("random");
         RandomVariate rv = RandomVariateFactory.getInstance("Gamma2", 1.0, 1.0);
         System.out.println(rv);
         rv.setParameters(2.0, 3.0);

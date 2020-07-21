@@ -10,16 +10,16 @@ import simkit.SimEvent;
  *
  * @author ahbuss
  */
-public class Executor extends BasicSimEntity  {
-    
+public class Executor extends BasicSimEntity {
+
     public static final BlockingQueue<Executor> EXECUTORS = new LinkedBlockingQueue<>();
 
     private final SimEntityBase simulation;
 
     private final int numberReplications;
-    
+
     private boolean verbose;
-    
+
     public Executor(SimEntityBase simulation, int numberReplications) {
         this.simulation = simulation;
         this.numberReplications = numberReplications;
@@ -31,10 +31,14 @@ public class Executor extends BasicSimEntity  {
     public void execute(int simID) {
         firePropertyChange("startSimulation", simID);
         for (int replication = 1; replication <= numberReplications; ++replication) {
-            getEventList().setVerbose(verbose);
-            getEventList().reset();
+            eventList.setVerbose(verbose);
+            try {
+                eventList.reset();
+            } catch (simkit.InvalidSchedulingException ex) {
+                System.err.printf("%s for eventList %,d%n", ex.getMessage(), eventList.getID());
+            }
             firePropertyChange("startReplication", replication);
-            getEventList().startSimulation();
+            eventList.startSimulation();
             firePropertyChange("endReplication", replication);
         }
         firePropertyChange("endSimulation", null);
