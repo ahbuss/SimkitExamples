@@ -8,13 +8,15 @@ import simkit.random.RandomVariate;
  *
  * @author ahbuss
  */
-public class Demands extends SimEntityBase  {
+public class CorrelatedDemands extends SimEntityBase {
 
     private RandomVariate interdemandTimeGenerator;
 
     private DiscreteRandomVariate demandGenerator;
-    
+
     private double truncationTime;
+    
+    private double multiplier;
 
     protected int numberDemands;
 
@@ -24,11 +26,13 @@ public class Demands extends SimEntityBase  {
      * @param demandGenerator
      * @param truncationTime
      */
-    public Demands(RandomVariate interdemandTimeGenerator, 
+    public CorrelatedDemands(RandomVariate interdemandTimeGenerator,
             DiscreteRandomVariate demandGenerator,
+            double multiplier,
             double truncationTime) {
         this.setDemandGenerator(demandGenerator);
         this.setInterdemandTimeGenerator(interdemandTimeGenerator);
+        this.setMultiplier(multiplier);
         this.setTruncationTime(truncationTime);
     }
 
@@ -36,27 +40,33 @@ public class Demands extends SimEntityBase  {
         super.reset();
         this.numberDemands = 0;
     }
-    
+
     public void doRun() {
         firePropertyChange("numberDemands", getNumberDemands());
-        
+
         waitDelay("Truncate", getTruncationTime());
-        
-        waitDelay("Demand", interdemandTimeGenerator);
+
+        double nextDemandTime = interdemandTimeGenerator.generate();
+        demandGenerator.setParameters(nextDemandTime * multiplier);
+
+        waitDelay("Demand", nextDemandTime);
     }
-    
+
     public void doTruncate() {
         this.numberDemands = 0;
         firePropertyChange("numberDemands", getNumberDemands());
     }
-    
+
     public void doDemand() {
         this.numberDemands += demandGenerator.generateInt();
         firePropertyChange("numberDemands", getNumberDemands());
-        
-        waitDelay("Demand", interdemandTimeGenerator);
+
+        double nextDemandTime = interdemandTimeGenerator.generate();
+        demandGenerator.setParameters(nextDemandTime * multiplier);
+
+        waitDelay("Demand", nextDemandTime);
     }
-        
+
     /**
      * @return the interdemandDTimeGenerator
      */
@@ -104,6 +114,20 @@ public class Demands extends SimEntityBase  {
      */
     public void setTruncationTime(double truncationTime) {
         this.truncationTime = truncationTime;
+    }
+
+    /**
+     * @return the multiplier
+     */
+    public double getMultiplier() {
+        return multiplier;
+    }
+
+    /**
+     * @param multiplier the multiplier to set
+     */
+    public final void setMultiplier(double multiplier) {
+        this.multiplier = multiplier;
     }
 
 }
