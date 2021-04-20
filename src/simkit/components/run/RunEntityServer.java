@@ -52,16 +52,18 @@ public class RunEntityServer {
      */
     public static void main(String args[]) {
         RandomVariate rv = RandomVariateFactory.getInstance(
-            "Uniform", 0.9, 2.2 );
+            "Uniform", 0.0, 4.0 );
+//        rv = RandomVariateFactory.getInstance("Exponential", 10.0);
         EntityCreator entityCreator = new EntityCreator(rv);
         
-        String rvName = "Gamma";
-        double alpha = 1.7;
+        String rvName = "Exponential";
+        double alpha = 1.8;
         double beta = 1.8;
+        double mean = 2.0;
         
-        rv = RandomVariateFactory.getInstance( rvName, alpha, beta );
+        rv = RandomVariateFactory.getInstance( rvName, mean );
         
-        int numServ = 2;
+        int numServ = 1;
         EntityServer entityServer = new EntityServer(numServ, rv);
         
         entityCreator.addSimEventListener(entityServer);
@@ -85,12 +87,20 @@ public class RunEntityServer {
         System.out.println(entityCreator);
         System.out.println(entityServer);
         
+        System.out.println("Steady-State:");
+        double lambda = 1.0 / 10.0;
+        double mu = 1.0 / 4.5;
+        double rho = lambda / mu;
+        double mu_D = rho / (mu - lambda);
+        System.out.printf("rho: %,.4f%n", rho);
+        System.out.printf("mu_D: %,.4f%n", mu_D);
+        
 //        Schedule.setVerbose(true);
         
 //        Schedule.setSingleStep(false);
         
 //        double stopTime = 2.0;
-        double stopTime = 10000.0;
+        double stopTime = 100000.0;
         
         Schedule.stopAtTime(stopTime);
         Schedule.reset();

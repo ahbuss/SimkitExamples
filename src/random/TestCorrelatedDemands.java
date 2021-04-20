@@ -24,7 +24,7 @@ public class TestCorrelatedDemands {
 
         RandomVariate interDemandGenerator = RandomVariateFactory.getInstance("GammaAR", lambda, rho, 3);
 //        interDemandGenerator = RandomVariateFactory.getInstance("Gamma", 1.2, 3.4);
-//        System.out.println(((GammaARVariate)interDemandGenerator).getMixtureVariate());
+        System.out.println(((GammaARVariate)interDemandGenerator).getMixtureVariate());
         
         double truncationTime = 2000.0;
         double[][] matrix = new double[][]{
@@ -55,10 +55,11 @@ public class TestCorrelatedDemands {
         
 
         double meanInterdemandTime = ((GammaARVariate) interDemandGenerator).getLambda() 
-                * ((GammaARVariate) interDemandGenerator).getK();
-//        double meanInterdemandTime = ((GammaVariate)interDemandGenerator).getAlpha() *
-//                ((GammaVariate)interDemandGenerator).getBeta();
-//        System.out.printf("Mean interdemand time = %,.3f%n", meanInterdemandTime);
+                * ((GammaARVariate) interDemandGenerator).getK() * (1.0 -
+                ((GammaARVariate)interDemandGenerator).getRho());
+//        double meanInterdemandTime = ((GammaARVariate)interDemandGenerator).getAlpha() *
+//                ((GammaARVariate)interDemandGenerator).getBeta();
+        System.out.printf("Mean interdemand time = %,.3f%n", meanInterdemandTime);
         
         double meanDemand = ((PoissonVariate)demandGenerator2).getMean();
         
