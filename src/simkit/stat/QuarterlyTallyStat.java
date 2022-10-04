@@ -1,6 +1,5 @@
 package simkit.stat;
 
-import java.beans.PropertyChangeEvent;
 import java.time.LocalDate;
 import java.util.SortedMap;
 import java.util.TreeMap;
