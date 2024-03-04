@@ -21,6 +21,7 @@ public class ArrivalProcess extends BasicSimEntity {
         this.setInterarrivalTimeGenerator(interarrivalTimeGenerator);
     }
     
+    @Override
     public void reset() {
         super.reset();
         this.numberArrivals = 0;
