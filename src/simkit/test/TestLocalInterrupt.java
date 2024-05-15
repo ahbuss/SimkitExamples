@@ -52,10 +52,14 @@ public class TestLocalInterrupt extends ArrivalProcess {
     public static void main(String[] args) {
         RandomVariate interarrivalTimeGenerator =
                 RandomVariateFactory.getInstance("Constant", 1.0);
-        TestLocalInterrupt instance = new TestLocalInterrupt(interarrivalTimeGenerator, 5.5);
+        TestLocalInterrupt instance = new TestLocalInterrupt(interarrivalTimeGenerator, 2.1);
         System.out.println(instance);
         
+        ArrivalProcess arrivalProcess = new ArrivalProcess(RandomVariateFactory.getInstance("Constant", 1.1));
+        System.out.println(arrivalProcess);
+        
         Schedule.setVerbose(true);
+        Schedule.stopAtTime(4.0);
         Schedule.reset();
         Schedule.startSimulation();
     }
