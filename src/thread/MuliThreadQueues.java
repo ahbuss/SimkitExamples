@@ -10,8 +10,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import simkit.BasicEventList;
 import simkit.Schedule;
-import simkit.components.ArrivalProcess;
-import simkit.components.SimpleServer;
+import simkit.examples.ArrivalProcess;
+import simkit.examples.SimpleServer;
 import simkit.random.RandomNumber;
 import simkit.random.RandomNumberFactory;
 import simkit.random.RandomVariate;
@@ -108,9 +108,9 @@ public class MuliThreadQueues {
             eventList.startSimulation();
 
             numberCompleted += 1;
-            completedSims.put(id, Thread.currentThread().getId());
+            completedSims.put(id, Thread.currentThread().threadId());
             System.out.printf("Sim %,d (Thread %d) ended at time %,.2f with mean # in queue %,.3f%n",
-                    id, Thread.currentThread().getId(), eventList.getSimTime(), numberInQueueStat.getMean());
+                    id, Thread.currentThread().threadId(), eventList.getSimTime(), numberInQueueStat.getMean());
         }
 
     }

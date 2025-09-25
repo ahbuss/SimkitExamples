@@ -10,9 +10,9 @@ import simkit.SimEvent;
  *
  * @author ahbuss
  */
-public class Executor extends BasicSimEntity {
+public class SimExecutor extends BasicSimEntity {
 
-    public static final BlockingQueue<Executor> EXECUTORS = new LinkedBlockingQueue<>();
+    public static final BlockingQueue<SimExecutor> EXECUTORS = new LinkedBlockingQueue<>();
 
     private final SimEntityBase simulation;
 
@@ -20,7 +20,7 @@ public class Executor extends BasicSimEntity {
 
     private boolean verbose;
 
-    public Executor(SimEntityBase simulation, int numberReplications) {
+    public SimExecutor(SimEntityBase simulation, int numberReplications) {
         this.simulation = simulation;
         this.numberReplications = numberReplications;
         this.setEventListID(simulation.getEventListID());

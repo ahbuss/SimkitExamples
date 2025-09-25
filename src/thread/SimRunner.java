@@ -2,7 +2,7 @@ package thread;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static thread.Executor.EXECUTORS;
+import static thread.SimExecutor.EXECUTORS;
 
 /**
  *
@@ -23,9 +23,9 @@ public class SimRunner implements Runnable {
     @Override
     public void run() {
         try {
-            Executor executor = EXECUTORS.take();
+            SimExecutor executor = EXECUTORS.take();
             LOGGER.log(Level.INFO, "Starting SimRunner {2} on Thread {0} and eventListID {1}", 
-                    new Object[]{Thread.currentThread().getId(), executor.getEventListID(), id});
+                    new Object[]{Thread.currentThread().threadId(), executor.getEventListID(), id});
             executor.execute(id);
             EXECUTORS.put(executor);
         } catch (InterruptedException ex) {

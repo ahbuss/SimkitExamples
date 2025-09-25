@@ -19,7 +19,7 @@ import simkit.random.RandomNumber;
 import simkit.random.RandomNumberFactory;
 import simkit.random.RandomVariate;
 import simkit.random.RandomVariateFactory;
-import thread.Executor;
+import thread.SimExecutor;
 import static thread.MetricType.TIME_VARYING;
 import thread.MetricsManager;
 import thread.SimRunner;
@@ -81,7 +81,7 @@ public class TestExecutor {
             simpleServer.setEventListID(id);
             arrivalProcess.addSimEventListener(simpleServer);
 
-            Executor executor = new Executor(simpleServer, numberReplications);
+            SimExecutor executor = new SimExecutor(simpleServer, numberReplications);
             executor.setVerbose(false);
             MetricsManager metricsManager = new MetricsManager(simpleServer, runID);
             metricsManager.setConnection(connection);

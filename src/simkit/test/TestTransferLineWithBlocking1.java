@@ -2,7 +2,6 @@ package simkit.test;
 
 import simkit.Schedule;
 import simkit.components.IntArrivalProcess;
-import simkit.components.TransferLineWithBlocking;
 import simkit.components.TransferLineWithBlocking1;
 import simkit.random.RandomVariate;
 import simkit.random.RandomVariateFactory;
