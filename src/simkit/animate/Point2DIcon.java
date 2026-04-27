@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import javax.swing.Icon;
 import simkit.SimEntityBase;
 import simkit.actions.visual.ShapeIcon;
+import simkit.smd.Moveable;
 import simkit.smd.Mover;
 
 /**
@@ -37,7 +38,7 @@ public class Point2DIcon extends MoverIcon {
     }
     
     @Override
-    public void setMover(Mover mover) {
+    public void setMover(Moveable mover) {
     }
     
     @Override
@@ -56,7 +57,7 @@ public class Point2DIcon extends MoverIcon {
         setBounds((int) (location.getX() - icon.getIconWidth() * 0.5),
                  (int)(location.getY() - icon.getIconHeight() * 0.5), 
                  icon.getIconWidth(), icon.getIconHeight());
-        icon.paintIcon(this, g, 0, 0);
+        icon.paintIcon(this, g2d, 0, 0);
     }
     
     /**

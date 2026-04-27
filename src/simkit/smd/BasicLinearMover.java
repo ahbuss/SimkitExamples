@@ -12,7 +12,7 @@ import simkit.SimEntityBase;
  *
  * @author ahbuss
  */
-public class BasicLinearMover extends SimEntityBase implements Mover {
+public class BasicLinearMover extends SimEntityBase implements Mover, Moveable  {
 
     /**
      * For formatting numbers to enhance readability when debugging

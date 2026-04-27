@@ -9,12 +9,7 @@ import simkit.SimEntity;
  *
  * @author ahbuss
  */
-public interface Mover extends SimEntity {
-
-    /**
-     * @return current location of the Mover
-     */
-    public Point2D getCurrentLocation();
+public interface Mover extends SimEntity, Moveable {
 
     /**
      * @return current velocity of the Mover

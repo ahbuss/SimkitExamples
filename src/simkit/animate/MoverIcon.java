@@ -6,7 +6,7 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 import javax.swing.Icon;
 import javax.swing.JComponent;
-import simkit.smd.Mover;
+import simkit.smd.Moveable;
 
 /**
  *
@@ -16,7 +16,7 @@ import simkit.smd.Mover;
 public class MoverIcon extends JComponent {
 
     private Icon icon;
-    private Mover myMover;
+    private Moveable myMover;
     private Point location;
     private Point2D origin;
     private Point2D screenLocation;
@@ -27,11 +27,11 @@ public class MoverIcon extends JComponent {
      * @param m Given Mover
      * @param icon Given Icon
      */
-    public MoverIcon(Mover m, Icon icon) {
+    public MoverIcon(Moveable m, Icon icon) {
         this(m, icon, new Point2D.Double());
     }
 
-    public MoverIcon(Mover m, Icon icon, Point2D origin) {
+    public MoverIcon(Moveable m, Icon icon, Point2D origin) {
         this.setIcon(icon);
         this.setMover(m);
         this.setSize(icon.getIconWidth(), icon.getIconHeight());
@@ -43,7 +43,7 @@ public class MoverIcon extends JComponent {
         this.setScale(1.0);
     }
 
-    public void setMover(Mover m) {
+    public void setMover(Moveable m) {
         myMover = m;
         this.setToolTipText(m.getName());
     }
@@ -56,7 +56,7 @@ public class MoverIcon extends JComponent {
         return icon;
     }
 
-    public Mover getMover() {
+    public Moveable getMover() {
         return myMover;
     }
 
@@ -89,7 +89,7 @@ public class MoverIcon extends JComponent {
         setBounds((int) (loc.getX() - icon.getIconWidth() * 0.5),
                 (int) (loc.getY() - icon.getIconHeight() * 0.5),
                 icon.getIconWidth(), icon.getIconHeight());
-        icon.paintIcon(this, g, 0, 0);
+        icon.paintIcon(this, g2d, 0, 0);
     }
 
     @Override
